@@ -1,0 +1,69 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("ทำเองเล่นเองนักเลงพอ", "BloodTheme")
+-- เครดิต
+local Tab = Window:NewTab("เครดิส")
+local Section = Tab:NewSection("สคริปของคนไทยเด้ออออออ Blade Ball Script Only!")
+Section:NewLabel("จัดทำโดยakihachinangไม่มีช่องทางติดต่อแต่ที่รู้ๆคนเขียนหล่อมากอิอิ")
+
+-- ฟังชั่น1
+local Tab = Window:NewTab("ฟังชั่นหลัก")
+local Section = Tab:NewSection("ออโต้ตีบอล")
+Section:NewButton("AutoParry", "กดเพื่อเรียกใช้", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Akihachibang/1/refs/heads/main/1f", true))()
+end)
+local Section = Tab:NewSection("ออโต้กดสกิล")
+Section:NewButton("AutoSkills", "ปุ่มX เปิด/ปิด", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Akihachibang/1/refs/heads/main/2f", true))()
+end)
+
+-- ตั้งค่า
+local Tab = Window:NewTab("ตั้งค่า")
+local Section = Tab:NewSection("จอขาว (จอขาวอาจจะยังบัคหรือปิดไม่หมดแต่ใช้ไปก่อนนะ) ")
+Section:NewButton("white UI", "ปุ่มZ เปิด/ปิด", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Akihachibang/1/refs/heads/main/3f", true))()
+end)
+
+-- ฟังชั่น3
+local Section = Tab:NewSection("BypassAfk(ไม่โดนafk20นาที) ")
+Section:NewButton("AntiAfk", "กดเพื่อเรียกใช้", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Akihachibang/1/refs/heads/main/%E0%B8%B7bypassAFK", true))()
+end)
+
+-- ฟังชั่น4
+local Section = Tab:NewSection("บูสfpsโดยตรง")
+Section:NewButton("Boostfps", "กดเพื่อเรียกใช้(หลังใช้ภาพจะกากนะครับ) ", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Akihachibang/1/refs/heads/main/fps", true))()
+end)
+
+-- เปิดปิดui
+local Section = Tab:NewSection("เปิดปิดuiสามารถตั้งปุ่มได้")
+Section:NewKeybind("เปิด/ปิดUI", "ตั้งคีร์ลัดได้", Enum.KeyCode.F, function()
+	Library:ToggleUI()
+end)
+
+-- วิ่งไว
+local Section = Tab:NewSection("วิ่งไว")
+Section:NewSlider("ปรับได้เลย", "ปรับเยอะระวังหลุด", 500, 0, function(s) -- 500 (MaxValue) | 0 (MinValue)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+end)
+
+
+-- อื่นๆ
+local Tab = Window:NewTab("อื่นๆ")
+local Section = Tab:NewSection("Dex Script")
+Section:NewButton("DEX", "สำหรับเขียนสริป", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+end)
+
+-- 1
+local Section = Tab:NewSection("Infinite Yield Script")
+Section:NewButton("Infinite Yield", "สำหรับเขียนสริป", function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+end)
+
+--2
+local Section = Tab:NewSection("UNC Check")
+Section:NewButton("Checkใส่มาเฉยๆใช้ไม่ได้ละมั้ง", "ดูuncของตัวรัน", function()
+    loadstring(game:HttpGet("https://github.com/Akihachibang/1/blob/main/unc"))()
+end)
+
