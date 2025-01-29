@@ -1,5 +1,5 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("ทำเองเล่นเองนักเลงพอ", "BloodTheme")
+local Window = Library.CreateLib("ทำเองเล่นเองนักเลงพอ", "Serpent")
 -- เครดิต
 local Tab = Window:NewTab("เครดิส")
 local Section = Tab:NewSection("สคริปของคนไทยเด้ออออออ Blade Ball Script Only!")
@@ -41,13 +41,12 @@ Section:NewKeybind("เปิด/ปิดUI", "ตั้งคีร์ลั�
 	Library:ToggleUI()
 end)
 
--- วิ่งไว
-local Section = Tab:NewSection("วิ่งไว")
-Section:NewSlider("ปรับได้เลย", "ปรับเยอะระวังหลุด", 500, 0, function(s) -- 500 (MaxValue) | 0 (MinValue)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = s
+--coler
+local Section = Tab:NewSection("เปลี่ยนสีอะไรไม่รุ้ใส่มามั่วๆ")
+Section:NewColorPicker("Color Text", "Color Info", Color3.fromRGB(0,0,0), function(color)
+    print(color)
+    -- Second argument is the default color
 end)
-
-
 -- อื่นๆ
 local Tab = Window:NewTab("อื่นๆ")
 local Section = Tab:NewSection("Dex Script")
@@ -66,4 +65,3 @@ local Section = Tab:NewSection("UNC Check")
 Section:NewButton("Checkใส่มาเฉยๆใช้ไม่ได้ละมั้ง", "ดูuncของตัวรัน", function()
     loadstring(game:HttpGet("https://github.com/Akihachibang/1/blob/main/unc"))()
 end)
-
