@@ -7,7 +7,7 @@ Section:NewLabel("จัดทำโดยakihachinangไม่มีช่อ�
 
 -- ฟังชั่น1
 local Tab = Window:NewTab("🤑ฟังชั่นหลัก")
-local Section = Tab:NewSection("🏓ออโต้ตีบอล")
+local Section = Tab:NewSection("ออโต้ตีบอล🏓")
 Section:NewButton("AutoParry", "กดเพื่อเรียกใช้", function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Akihachibang/1/refs/heads/main/1f", true))()
 end)
