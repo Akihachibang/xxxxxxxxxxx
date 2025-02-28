@@ -1,0 +1,70 @@
+-- กำหนด Job ID ตรงนี้
+local jobID = "d9c0e664-f0f1-4828-9ee3-4acef795c045"
+
+-- ฟังก์ชันรับรางวัลที่ทำงานซ้ำไปเรื่อย ๆ
+_G.ClaimRewards = function(index)
+    while true do
+        local args = { [1] = index }
+        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index")
+            :WaitForChild("sleitnick_net@0.1.0"):WaitForChild("net")
+            :WaitForChild("RF/ClaimPlaytimeReward"):InvokeServer(unpack(args))
+        print("Claimed Playtime Reward:", index)
+        wait(10 * index) -- รอเวลาตามลำดับเพื่อไม่ให้ซ้อนกัน
+    end
+end
+
+-- เรียกใช้รับรางวัลทั้ง 6 อัน แยกกัน
+for i = 1, 6 do
+    task.spawn(function()
+        _G.ClaimRewards(i)
+    end)
+end
+
+-- สร้าง GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Parent = game:GetService("CoreGui")
+
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Size = UDim2.new(0.5, 0, 0.1, 0)
+TextLabel.Position = UDim2.new(0.25, 0, 0.35, 0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Text = "AKI HUB ClaimRewards"
+TextLabel.TextColor3 = Color3.new(1, 1, 1)
+TextLabel.TextScaled = true
+TextLabel.Font = Enum.Font.SourceSansBold
+TextLabel.Parent = ScreenGui
+
+local TimerLabel = Instance.new("TextLabel")
+TimerLabel.Size = UDim2.new(0.5, 0, 0.1, 0)
+TimerLabel.Position = UDim2.new(0.25, 0, 0.45, 0)
+TimerLabel.BackgroundTransparency = 1
+TimerLabel.TextColor3 = Color3.new(1, 1, 1)
+TimerLabel.TextScaled = true
+TimerLabel.Font = Enum.Font.SourceSansBold
+TimerLabel.Parent = ScreenGui
+
+-- ฟังก์ชันจับเวลา 30 นาที
+task.spawn(function()
+    for i = 1800, 0, -1 do
+        TimerLabel.Text = "รีจอยในอีก: " .. math.floor(i / 60) .. " นาที " .. (i % 60) .. " วินาที"
+        wait(1)
+    end
+
+    -- รีจอยไปเซิร์ฟ FiveM ตาม Job ID ที่กำหนด
+    if jobID and jobID ~= "" then
+        game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, jobID)
+    else
+        print("ไม่ได้ใส่ Job ID, ไม่สามารถรีจอยได้")
+    end
+end)
+
+-- ระบบ Anti AFK (กดเดินทุก 30 วินาที)
+task.spawn(function()
+    local VirtualInputManager = game:GetService("VirtualInputManager")
+    while true do
+        wait(30)
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.W, false, game)
+        wait(0.1)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.W, false, game)
+    end
+end)
