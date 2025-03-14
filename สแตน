@@ -1,0 +1,90 @@
+local TweenService = game:GetService("TweenService") -- นำเข้า TweenService
+
+local Player = game.Players.LocalPlayer
+local Gui = Instance.new("ScreenGui")
+Gui.Parent = Player.PlayerGui
+
+-- สร้างกรอบ UI
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 300, 0, 250)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -125)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)  -- สีกรอบ
+Frame.BorderSizePixel = 2  -- ขนาดขอบ
+Frame.Active = true  -- **เปิดให้ลาก UI ได้**
+Frame.Draggable = true  -- **ทำให้ลาก UI ด้วยเมาส์ได้**
+Frame.Parent = Gui
+
+local TextBox = Instance.new("TextBox")
+TextBox.Size = UDim2.new(0, 200, 0, 50)
+TextBox.Position = UDim2.new(0.5, -100, 0.2, 0)
+TextBox.PlaceholderText = "ใส่ชื่อผู้เล่น"
+TextBox.Parent = Frame
+
+local SubmitButton = Instance.new("TextButton")
+SubmitButton.Size = UDim2.new(0, 200, 0, 50)
+SubmitButton.Position = UDim2.new(0.5, -100, 0.4, 0)
+SubmitButton.Text = "ยืนยัน"
+SubmitButton.Parent = Frame
+
+local CancelButton = Instance.new("TextButton")
+CancelButton.Size = UDim2.new(0, 100, 0, 50)
+CancelButton.Position = UDim2.new(0.5, -50, 0.6, 0)
+CancelButton.Text = "ยกเลิก"
+CancelButton.Parent = Frame
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 50, 0, 50)
+CloseButton.Position = UDim2.new(1, -55, 0, 5)
+CloseButton.Text = "✖"
+CloseButton.Parent = Frame
+
+local followingPlayer = nil
+local followingActive = false
+
+-- ฟังก์ชันวาปตาม
+SubmitButton.MouseButton1Click:Connect(function()
+    local playerName = TextBox.Text
+    if playerName ~= "" then
+        local targetPlayer = game.Players:FindFirstChild(playerName)
+        if targetPlayer then
+            followingPlayer = targetPlayer
+            followingActive = true
+
+            task.spawn(function()
+                while followingActive and followingPlayer and followingPlayer.Character and followingPlayer.Character:FindFirstChild("HumanoidRootPart") do
+                    local character = Player.Character or Player.CharacterAdded:Wait()
+                    local targetCharacter = followingPlayer.Character
+                    local targetRoot = targetCharacter.HumanoidRootPart
+
+                    -- คำนวณตำแหน่งด้านหลังของเป้าหมาย
+                    local targetPosition = targetRoot.Position - targetRoot.CFrame.LookVector * 5
+                    targetPosition = Vector3.new(targetPosition.X, targetPosition.Y + 5, targetPosition.Z)  -- ลอยขึ้น 5 studs
+
+                    -- สร้างการเคลื่อนไหวแบบสมูธโดยใช้ Tween
+                    local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                    local moveTween = TweenService:Create(character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPosition, targetRoot.Position)})
+                    moveTween:Play()
+
+                    wait(0.2)  -- เวลาหน่วงการวาร์ป
+                end
+            end)
+        else
+            print("ไม่พบผู้เล่นที่ชื่อ: " .. playerName)
+        end
+    else
+        print("กรุณาใส่ชื่อผู้เล่น")
+    end
+end)
+
+-- ปุ่ม "ยกเลิก" เพื่อหยุดวาปตาม
+CancelButton.MouseButton1Click:Connect(function()
+    followingActive = false
+    followingPlayer = nil
+    print("ยกเลิกการวาปตามผู้เล่น")
+end)
+
+-- ปุ่มปิด UI
+CloseButton.MouseButton1Click:Connect(function()
+    Gui:Destroy()
+    print("ปิด UI")
+end)
