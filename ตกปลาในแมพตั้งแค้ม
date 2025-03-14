@@ -1,0 +1,70 @@
+local player = game:GetService("Players").LocalPlayer
+local backpack = player:FindFirstChild("Backpack")
+local vim = game:GetService("VirtualInputManager")
+local camera = workspace.CurrentCamera
+local humanoid = player.Character and player.Character:FindFirstChild("Humanoid")
+
+-- ตัวแปรสำหรับเปิด/ปิดการทำงาน
+_G.FishingRodAutoClick = not _G.FishingRodAutoClick
+
+-- ฟังก์ชันล็อคตัวละครให้ยืนอยู่ (ไม่เคลื่อนไหวและไม่ล้ม)
+local function freezeCharacter()
+    if humanoid and player.Character.PrimaryPart then
+        humanoid.WalkSpeed = 0
+        humanoid.JumpPower = 0
+        humanoid.PlatformStand = true
+        player.Character.PrimaryPart.Anchored = true
+    end
+end
+
+-- ฟังก์ชันปลดล็อคตัวละคร (คืนค่า WalkSpeed, JumpPower และ Unanchor)
+local function unfreezeCharacter()
+    if humanoid and player.Character.PrimaryPart then
+        humanoid.WalkSpeed = 16      -- ค่าเริ่มต้นของ WalkSpeed
+        humanoid.JumpPower = 50      -- ค่าเริ่มต้นของ JumpPower
+        humanoid.PlatformStand = false
+        player.Character.PrimaryPart.Anchored = false
+    end
+end
+
+if _G.FishingRodAutoClick then
+    print("✅ เริ่มกดคลิกซ้ายค้าง อัตโนมัติ, ล็อคการเคลื่อนไหวและล็อคหน้าจอ")
+    
+    -- เลือก FishingRod ถ้ามีอยู่ใน Backpack
+    if backpack then
+        local item = backpack:FindFirstChild("FishingRod")
+        if item then
+            player.Character.Humanoid:EquipTool(item)
+        end
+    end
+
+    -- กำหนดตำแหน่งสำหรับวาปและตำแหน่งที่ให้ตัวละครหันหน้า
+    local teleportPosition = Vector3.new(-235, 250, 777)
+    local lookTarget = Vector3.new(-241, 244, 864)
+    
+    -- วาปตัวละครไปยังตำแหน่ง teleportPosition พร้อมหันหน้าไปที่ lookTarget
+    player.Character:SetPrimaryPartCFrame(CFrame.lookAt(teleportPosition, lookTarget))
+
+    -- ล็อคตัวละครให้อยู่ในท่าทางยืนและไม่ล้ม
+    freezeCharacter()
+
+    -- ล็อคหน้าจอ โดยเปลี่ยนกล้องไปเป็น Scriptable และอัพเดตให้มองไปที่ lookTarget
+    camera.CameraType = Enum.CameraType.Scriptable
+    camera.CFrame = CFrame.lookAt(player.Character.HumanoidRootPart.Position, lookTarget)
+
+    -- เริ่มส่งอินพุตคลิกซ้ายค้างและอัพเดตกล้องให้คงมองในทิศทางเดียวกัน
+    while _G.FishingRodAutoClick do
+        vim:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+        camera.CFrame = CFrame.lookAt(player.Character.HumanoidRootPart.Position, lookTarget)
+        task.wait(0.1)
+    end
+else
+    print("❌ หยุดการทำงานแล้ว, ปลดล็อคการเคลื่อนไหวและหน้าจอ")
+    vim:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+    
+    -- ปลดล็อคตัวละคร
+    unfreezeCharacter()
+
+    -- คืนค่ากล้องให้กลับมาควบคุมได้ตามปกติ
+    camera.CameraType = Enum.CameraType.Custom
+end
