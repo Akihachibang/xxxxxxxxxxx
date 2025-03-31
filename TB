@@ -2,8 +2,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- ตั้งค่าระยะห่างจากบอล
-local DISTANCE_UNDER_BALL = 7  -- อยู่ใต้บอล 7 หน่วย
+-- ตั้งค่าระยะห่างจากบอล (อยู่เหนือบอล 5 หน่วย)
+local DISTANCE_ABOVE_BALL = 5
 
 -- ระบบรอผู้เล่น
 local Player = Players.LocalPlayer
@@ -33,26 +33,26 @@ local floatSystem = {
     Connections = {},
     Settings = {
         FloatingSpeed = 1,
-        MinDistance = DISTANCE_UNDER_BALL,
-        MaxDistance = DISTANCE_UNDER_BALL + 2
+        MinDistance = DISTANCE_ABOVE_BALL,  -- ระยะต่ำสุดเหนือบอล
+        MaxDistance = DISTANCE_ABOVE_BALL + 2  -- ระยะสูงสุดเหนือบอล
     }
 }
 
--- ฟังก์ชันลอยใต้บอล
-local function floatUnderBall(character)
+-- ฟังก์ชันลอยเหนือบอล
+local function floatAboveBall(character)
     local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     
     -- หาตำแหน่งบอล
     local ballPart = Ball:IsA("Model") and (Ball.PrimaryPart or Ball:FindFirstChildWhichIsA("BasePart")) or Ball
     if not ballPart then return end
     
-    -- คำนวณตำแหน่ง
+    -- คำนวณตำแหน่ง (เปลี่ยนจาก - เป็น + เพื่ออยู่เหนือบอล)
     local timeOffset = math.sin(tick() * floatSystem.Settings.FloatingSpeed) * 0.5
     local targetOffset = floatSystem.Settings.MinDistance + timeOffset
     
-    -- ตั้งค่าตำแหน่งใหม่
+    -- ตั้งค่าตำแหน่งใหม่เหนือบอล
     humanoidRootPart.CFrame = CFrame.new(
-        ballPart.Position + Vector3.new(0, -targetOffset, 0),
+        ballPart.Position + Vector3.new(0, targetOffset, 0),  -- เปลี่ยนเป็นบวก
         ballPart.Position
     )
     
@@ -71,15 +71,14 @@ local function setupCharacter()
     
     -- ตั้งค่าตัวละครใหม่เมื่อเกิด
     character:WaitForChild("Humanoid").Died:Connect(function()
-        -- รอจนกว่าจะเกิดใหม่
         Player.CharacterAdded:Wait()
         setupCharacter()
     end)
     
-    -- เริ่มลอยใต้บอล
+    -- เริ่มลอยเหนือบอล
     floatSystem.Connections["FloatLoop"] = RunService.Heartbeat:Connect(function()
         if floatSystem.Active and character:FindFirstChild("HumanoidRootPart") then
-            floatUnderBall(character)
+            floatAboveBall(character)
         end
     end)
 end
