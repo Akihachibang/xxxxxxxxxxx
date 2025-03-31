@@ -2,8 +2,8 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
--- ตั้งค่าระยะห่างจากบอล (ปรับค่าได้ตามต้องการ)
-local DISTANCE_UNDER_BALL = 7  -- อยู่ใต้บอล 8 หน่วย (เพิ่มจากเดิม 5 หน่วย)
+-- ตั้งค่าระยะห่างจากบอล
+local DISTANCE_UNDER_BALL = 7  -- อยู่ใต้บอล 7 หน่วย
 
 -- ระบบรอผู้เล่น
 local Player = Players.LocalPlayer
@@ -32,24 +32,21 @@ local floatSystem = {
     Active = true,
     Connections = {},
     Settings = {
-        FloatingSpeed = 1,    -- ความเร็วการลอย (ปรับได้)
-        MinDistance = DISTANCE_UNDER_BALL,  -- ระยะต่ำสุดใต้บอล
-        MaxDistance = DISTANCE_UNDER_BALL + 2  -- ระยะสูงสุดใต้บอล (ให้มีการลอยขึ้นลงเล็กน้อย)
+        FloatingSpeed = 1,
+        MinDistance = DISTANCE_UNDER_BALL,
+        MaxDistance = DISTANCE_UNDER_BALL + 2
     }
 }
 
 -- ฟังก์ชันลอยใต้บอล
-local function floatUnderBall()
-    if not Player.Character then return end
-    
-    local humanoidRootPart = Player.Character:FindFirstChild("HumanoidRootPart")
-    if not humanoidRootPart then return end
+local function floatUnderBall(character)
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
     
     -- หาตำแหน่งบอล
     local ballPart = Ball:IsA("Model") and (Ball.PrimaryPart or Ball:FindFirstChildWhichIsA("BasePart")) or Ball
     if not ballPart then return end
     
-    -- คำนวณตำแหน่งใต้บอล + การลอยขึ้นลงเล็กน้อยแบบธรรมชาติ
+    -- คำนวณตำแหน่ง
     local timeOffset = math.sin(tick() * floatSystem.Settings.FloatingSpeed) * 0.5
     local targetOffset = floatSystem.Settings.MinDistance + timeOffset
     
@@ -60,7 +57,7 @@ local function floatUnderBall()
     )
     
     -- จำลองการกดปุ่ม F
-    if tick() % 0.1 < 0.02 then  -- กด F 5 ครั้งต่อวินาที
+    if tick() % 0.1 < 0.02 then
         local pressFEvent = ReplicatedStorage:FindFirstChild("PressFEvent")
         if pressFEvent then
             pressFEvent:FireServer()
@@ -68,11 +65,21 @@ local function floatUnderBall()
     end
 end
 
--- ระบบลอยอัตโนมัติ
-local function startFloatingSystem()
-    floatSystem.Connections["Heartbeat"] = RunService.Heartbeat:Connect(function()
-        if floatSystem.Active then
-            floatUnderBall()
+-- ระบบจัดการตัวละคร
+local function setupCharacter()
+    local character = Player.Character or Player.CharacterAdded:Wait()
+    
+    -- ตั้งค่าตัวละครใหม่เมื่อเกิด
+    character:WaitForChild("Humanoid").Died:Connect(function()
+        -- รอจนกว่าจะเกิดใหม่
+        Player.CharacterAdded:Wait()
+        setupCharacter()
+    end)
+    
+    -- เริ่มลอยใต้บอล
+    floatSystem.Connections["FloatLoop"] = RunService.Heartbeat:Connect(function()
+        if floatSystem.Active and character:FindFirstChild("HumanoidRootPart") then
+            floatUnderBall(character)
         end
     end)
 end
@@ -93,7 +100,7 @@ local function trackBallChanges()
 end
 
 -- เริ่มต้นระบบ
-startFloatingSystem()
+setupCharacter()
 trackBallChanges()
 
 -- ทำความสะอาดเมื่อเกมปิด
