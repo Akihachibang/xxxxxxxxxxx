@@ -3,7 +3,7 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- ตั้งค่าระยะห่างจากบอล (ปรับค่าได้ตามต้องการ)
-local DISTANCE_UNDER_BALL = 6  -- อยู่ใต้บอล 8 หน่วย (เพิ่มจากเดิม 5 หน่วย)
+local DISTANCE_UNDER_BALL = 7  -- อยู่ใต้บอล 8 หน่วย (เพิ่มจากเดิม 5 หน่วย)
 
 -- ระบบรอผู้เล่น
 local Player = Players.LocalPlayer
