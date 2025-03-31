@@ -1,0 +1,115 @@
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
+-- ระบบรอผู้เล่น
+local Player = Players.LocalPlayer
+while not Player do
+    Players.PlayerAdded:Wait()
+    Player = Players.LocalPlayer
+end
+
+-- ระบบติดตามบอลที่เสถียร
+local function getBall()
+    local ballsFolder = workspace:WaitForChild("Balls")
+    local ball = ballsFolder:FindFirstChild("Ball")
+    
+    -- ถ้าไม่มีบอล ให้รอจนกว่าจะมี
+    while not ball do
+        local newBall = ballsFolder.ChildAdded:Wait()
+        if newBall.Name == "Ball" then
+            ball = newBall
+        end
+    end
+    
+    return ball
+end
+
+local Ball = getBall()
+
+-- ตัวแปรระบบ
+local system = {
+    Cooldown = 0,
+    Parried = false,
+    Connections = {},
+    LastBallPosition = Vector3.new(0,0,0)
+}
+
+-- ฟังก์ชันทำความสะอาด
+local function cleanup()
+    for _, conn in pairs(system.Connections) do
+        conn:Disconnect()
+    end
+    system.Connections = {}
+end
+
+-- ระบบตรวจจับบอลใหม่
+local function setupBallTracking()
+    cleanup()
+    
+    -- เชื่อมต่อสัญญาณเมื่อบอลเปลี่ยนเป้าหมาย
+    system.Connections["TargetChanged"] = Ball:GetAttributeChangedSignal("target"):Connect(function()
+        system.Parried = false
+    end)
+    
+    -- เชื่อมต่อเมื่อบอลถูกทำลาย
+    system.Connections["BallRemoved"] = Ball.AncestryChanged:Connect(function(_, parent)
+        if not parent then
+            Ball = getBall()
+            setupBallTracking()
+        end
+    end)
+end
+
+-- ระบบตรวจจับและกดปุ่ม F
+local function setupDetection()
+    system.Connections["Heartbeat"] = RunService.Heartbeat:Connect(function()
+        local character = Player.Character
+        if not character then return end
+        
+        local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+        if not humanoidRootPart then return end
+        
+        -- ตรวจสอบว่าบอลยังมีอยู่
+        if not Ball or not Ball.Parent then
+            Ball = getBall()
+            setupBallTracking()
+            return
+        end
+        
+        -- หาตำแหน่งจริงของบอล (รองรับทั้ง Model และ Part)
+        local ballPart = Ball:IsA("BasePart") and Ball or Ball:FindFirstChildWhichIsA("BasePart")
+        if not ballPart then return end
+        
+        -- คำนวณความเร็วและระยะทาง
+        local velocity = ballPart:FindFirstChild("zoomies")
+        local currentSpeed = velocity and velocity.VectorVelocity.Magnitude or 0
+        local currentDistance = (humanoidRootPart.Position - ballPart.Position).Magnitude
+        
+        -- ตรวจสอบเงื่อนไขการกดปุ่ม F
+        if currentSpeed > 0 
+           and Ball:GetAttribute("target") == Player.Name 
+           and not system.Parried 
+           and (currentDistance / currentSpeed) <= 0.30 then
+            
+            -- กดปุ่ม F
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.F, false, game)
+            
+            system.Parried = true
+            system.Cooldown = tick()
+        end
+        
+        -- รีเซ็ตสถานะหลังจาก 0.1 วินาที
+        if system.Parried and (tick() - system.Cooldown) >= 0.1 then
+            system.Parried = false
+        end
+    end)
+end
+
+-- เริ่มต้นระบบ
+setupBallTracking()
+setupDetection()
+
+-- ทำความสะอาดเมื่อเกมปิด
+game:BindToClose(cleanup)
