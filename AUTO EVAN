@@ -1,1 +1,13 @@
+local player = game.Players.LocalPlayer
+
+local function teleport()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+    if humanoidRootPart then
+        humanoidRootPart.CFrame = CFrame.new(-255, 124, 201)
+    end
+end
+
+teleport()
 
